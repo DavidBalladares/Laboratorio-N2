@@ -1,11 +1,5 @@
-// genera una tabla de alumnos y los guarda en un archivo de texto
-// crear la opción de eliminar un registro buscara el registro por codigo
-// modificar la busqueda que sea por codigo o por nombre.
 #include <iostream>
 #include <fstream>
-#include <conio.h>
-#include <stdio.h>
-#include <string.h>
 using namespace std;
 struct alumno
 {
@@ -67,49 +61,63 @@ void leer_archivo()
     }
     arch.close();
 }
-
 void buscar()
 {
-    string archivo, linea, cod;
+    string archivo, linea, nom, codigo, nombre, nota;
     ifstream arch;
+    int opcmenu;
+    bool bandera = false;
     cout << "Ingrese el nombre del archivo: ";
     cin.ignore();
     getline(cin, archivo);
     arch.open(archivo.c_str(), ios::out);
-    cout << "Digite el codigo del alumno a buscar: ";
-    cin >> cod;
+    cout << "Ingrese el nombre del alumno a buscar: ";
+    cin >> nom;
+        if (arch.fail())
+        {
+            cout << "No encuentra el archivo\n";
+            return;
+        }
+        while (!arch.eof())
+        {
 
-    if (arch.fail())
-    {
-        cout << "No encuentra el archivo\n";
-        return;
-    }
-    while (!arch.eof())
-    {
-        getline(arch, linea);
-        if (linea.substr(0, 1) == cod)
-        {
-            cout << linea << endl;
+            arch >> codigo >> nombre >> nota;
+            if (nombre == nom)
+            {
+                bandera = true;
+                cout << codigo << "\t" << nombre << "\t" << nota << endl;
+                break;
+            }
         }
-        else
+
+        if(bandera == false)
         {
-            cout << "El registro no existe\n";
+            cout<<"Registro no encontrado\n";
+            
         }
+    
+    else
+    {
+        cout << "\nIngreso de opcion no valido!\n";
     }
+
 }
-
-void eliminar()
+void eliminar_registro()
 {
-    string archivo, linea, cod;
+    string archivo, linea, cod, codigo, nombre, nota;
     ifstream arch;
-    ofstream aux;
-    aux.open ("auxiliar.txt", ios::out);
+    ofstream auxiliar;
+    bool encontrado = false;
+    char *archencontrado;
     cout << "Ingrese el nombre del archivo: ";
     cin.ignore();
     getline(cin, archivo);
     arch.open(archivo.c_str(), ios::out);
-    cout << "Digite el codigo del alumno a buscar: ";
+    auxiliar.open("auxiliar.txt", ios::out);
+    archencontrado = const_cast<char *>(archivo.c_str());
+    cout << "Digite el codigo del alumno a eliminar: ";
     cin >> cod;
+
     if (arch.fail())
     {
         cout << "No encuentra el archivo\n";
@@ -117,21 +125,30 @@ void eliminar()
     }
     while (!arch.eof())
     {
-        getline(arch, linea);
-        if (linea.substr(0, 1) == cod)
+        arch >> codigo >> nombre >> nota;
+        if (codigo == cod)
         {
-            cout << "\nEl archivo se elimino" << endl;
-            getch();
+            encontrado = true;
+            cout << "\n Se elimino el registro ";
+            cout << codigo << "\t" << nombre << "\t" << nota << endl;
+            codigo = "";
+            nombre = "";
+            nota = "";
+            auxiliar << codigo << "" << nombre << "" << nota;
         }
         else
-        { 
-            aux << linea << endl;
+        {
+            auxiliar << codigo << " " << nombre << " " << nota << "\n";
         }
     }
-    remove("archivo");
-    rename ( "auxiliar.txt", "archivo.txt" );
-
-
+    if (encontrado == false)
+    {
+        cout << "\n\nNo se encontro al alumno con el codigo: " << cod << "\n\n";
+    }
+    arch.close();
+    auxiliar.close();
+    remove(archencontrado);
+    rename("auxiliar.txt", archencontrado);
 }
 main()
 {
@@ -155,7 +172,10 @@ main()
             buscar();
             break;
         case 4:
-            eliminar();
+            eliminar_registro();
+            break;
+        case 5:
+            cout << "Saliendo del sistema ";
             break;
         default:
             cout << "Opción no valida ";
